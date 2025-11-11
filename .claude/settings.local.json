@@ -1,12 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Github__search_repositories",
       "Bash(git init:*)",
-      "mcp__Github__create_repository",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "WebSearch",
+      "Bash(python:*)",
+      "Bash(findstr:*)",
+      "Bash(nul:*)",
+      "Bash(dir:*)",
+      "Bash(claude:*)",
+      "Bash(where claude 2)",
+      "Bash(claude.cmd:*)",
+      "Bash(where:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "mcpServers": {}
 }
