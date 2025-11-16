@@ -18,7 +18,11 @@
       "Bash(claude.cmd:*)",
       "Bash(where:*)",
       "Bash(del:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "mcp__filesystem_stdio__list_files",
+      "Bash(pip:*)",
+      "Bash(git clone:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

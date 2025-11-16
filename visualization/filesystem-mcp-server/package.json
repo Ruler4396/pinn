@@ -1,0 +1,90 @@
+{
+  "name": "@cyanheads/filesystem-mcp-server",
+  "version": "1.0.4",
+  "description": "A Model Context Protocol (MCP) server for platform-agnostic file capabilities, including advanced search and replace, and directory tree traversal",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyanheads/filesystem-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cyanheads/filesystem-mcp-server/issues"
+  },
+  "homepage": "https://github.com/cyanheads/filesystem-mcp-server#readme",
+  "scripts": {
+    "build": "tsc",
+    "clean": "ts-node scripts/clean.ts",
+    "rebuild": "ts-node --esm scripts/clean.ts && npm run build",
+    "start": "node dist/index.js",
+    "start:stdio": "MCP_LOG_LEVEL=debug MCP_TRANSPORT_TYPE=stdio node dist/index.js",
+    "start:http": "MCP_LOG_LEVEL=debug MCP_TRANSPORT_TYPE=http node dist/index.js",
+    "tree": "ts-node --esm scripts/tree.ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md,html,css}\"",
+    "inspector": "mcp-inspector --config mcp.json --server @cyanheads/filesystem-mcp-server"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.1",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.21",
+    "@types/sanitize-html": "^2.16.0",
+    "@types/validator": "13.15.1",
+    "chalk": "^5.4.1",
+    "chrono-node": "^2.8.0",
+    "cli-table3": "^0.6.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "ignore": "^7.0.4",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^4.103.0",
+    "partial-json": "^0.1.7",
+    "sanitize-html": "^2.17.0",
+    "tiktoken": "^1.0.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "validator": "13.15.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "yargs": "^17.7.2",
+    "zod": "^3.25.23"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/js-yaml": "^4.0.9",
+    "axios": "^1.9.0",
+    "js-yaml": "^4.1.0",
+    "prettier": "^3.5.3",
+    "typedoc": "^0.28.4"
+  },
+  "keywords": [
+    "AI-integration",
+    "MCP",
+    "authentication",
+    "client",
+    "file-operations",
+    "file-system",
+    "filesystem",
+    "http",
+    "jwt",
+    "LLM",
+    "model-context-protocol",
+    "sdk",
+    "search-replace",
+    "server",
+    "sse",
+    "template",
+    "typescript"
+  ],
+  "author": "Casey Hand <casey@caseyjhand.com> (https://github.com/cyanheads/filesystem-mcp-server#readme)",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

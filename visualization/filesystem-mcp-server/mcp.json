@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "@cyanheads/filesystem-mcp-server": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": {
+        "MCP_LOG_LEVEL": "debug",
+        "MCP_TRANSPORT_TYPE": "stdio",
+        "MCP_HTTP_PORT": "3010",
+        "LOGS_DIR": "./logs",
+        "FS_BASE_DIRECTORY": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+# Git files
+.git
+.gitignore
+
+# Node modules (installed within Docker)
+node_modules
+
+# Build output (created within Docker)
+dist
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files (should be injected, not built-in)
+.env*
+!/.env.example
+
+# Editor/IDE config
+.vscode/
+.idea/
+
+# Backups
+backups/
