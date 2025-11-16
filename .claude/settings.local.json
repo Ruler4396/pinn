@@ -22,7 +22,8 @@
       "mcp__filesystem_stdio__list_files",
       "Bash(pip:*)",
       "Bash(git clone:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
