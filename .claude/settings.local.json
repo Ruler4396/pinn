@@ -45,7 +45,10 @@
       "Bash(powershell -Command \"Get-ChildItem ''D:\\\\PINNs\\\\comsol_simulation\\\\scripts\\\\*.py'' | Where-Object {$_Name -match ''^\\(test|verify|validate\\)''} | Select-Object -ExpandProperty Name\")",
       "Bash(ls:*)",
       "Bash(xargs:*)",
-      "Bash(git -C \"D:\\\\PINNs\" add -A)"
+      "Bash(git -C \"D:\\\\PINNs\" add -A)",
+      "Bash(git -C \"D:\\\\PINNs\" commit -m \"$\\(cat <<''EOF''\nrefactor: 重组项目目录结构，采用科学分层\n\n主要变更:\n- 创建模块化脚本目录结构 \\(tests/data_processing/model_creation/batch/utils\\)\n- 移动37个脚本文件到对应功能子目录\n- 新增docs目录统一存放文档文件\n- 更新README中所有路径引用\n\n新目录结构:\n  scripts/tests/          - 测试验证脚本 \\(11个\\)\n  scripts/data_processing/ - 数据处理脚本 \\(6个\\)\n  scripts/model_creation/  - 模型创建脚本 \\(9个\\)\n  scripts/batch/          - 批量处理脚本 \\(6个\\)\n  scripts/utils/          - 工具函数 \\(1个\\)\n  docs/                   - 文档文件 \\(5个\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"D:\\\\PINNs\" add README.md comsol_simulation/scripts/data_processing/convert_to_hdf5.py comsol_simulation/scripts/tests/verify_new_data.py)",
+      "Bash(git -C \"D:\\\\PINNs\" commit -m \"$\\(cat <<''EOF''\ndocs: 添加微流控芯片几何参数定义并更新数据状态\n\n主要更新:\n- 新增微流控芯片几何参数定义章节\n- 详细说明物理模型尺寸、Reynolds数、坐标系统\n- 更新当前数据状态 \\(3组已完成, 1.58M数据点\\)\n- 更新进度跟踪表 \\(33%完成\\)\n- 新增数据验证和格式转换脚本\n\n几何参数:\n- 通道长度: 10 mm\n- 通道宽度: 150/200/250 μm\n- 入口速度: 0.1/0.5/1.0 cm/s\n- Reynolds数: 0.15-2.5 \\(层流\\)\n\n数据文件:\n- comsol_real_data.h5 \\(v1.0_w200\\)\n- v01_w200.h5 \\(v0.1_w200\\)\n- v05_w200.h5 \\(v0.5_w200\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []
