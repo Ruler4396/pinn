@@ -1,0 +1,156 @@
+COMSOL 2D微通道模型 - 分步创建指南
+======================================
+
+步骤1: 新建模型
+--------------
+1. 启动 COMSOL Multiphysics 6.3
+2. 选择 "Blank Model"
+3. 设置 "Space Dimension" = "2D"
+4. 点击 "Create"
+
+步骤2: 参数设置
+--------------
+1. 右击 "Definitions" > "Parameters"
+2. 在参数表中添加以下参数:
+
+Name        | Value
+-----------|--------------------
+L_ch       | 10[mm]
+W_ch       | 0.2[mm]
+U_inlet    | 0.01[m/s]
+rho_fluid  | 1000[kg/m^3]
+mu_fluid   | 0.001[Pa*s]
+P_outlet   | 0[Pa]
+
+步骤3: 几何创建
+--------------
+1. 右击 "Geometry 1" > "Rectangle"
+2. 在设置面板中:
+   - Size: "L_ch" "W_ch"  (输入时去掉引号)
+   - Position: "0" "0"
+3. 点击 "Build Selected"
+4. 右击 "Geometry 1" > "Build All"
+
+步骤4: 物理场设置
+--------------
+1. 右击 "Component 1" > "Add Physics"
+2. 选择 "Fluid Flow" > "Single-Phase Flow" > "Laminar Flow"
+3. 点击 "Add"
+
+设置边界条件:
+1. 展开 "Laminar Flow (spf)"
+2. 右击 "Laminar Flow" > "Inlet"
+3. 在图形中选择左边界 (边界1)
+4. 设置 "Boundary Condition" = "Velocity"
+5. "Velocity magnitude" = "U_inlet"
+
+6. 右击 "Laminar Flow" > "Outlet"
+7. 在图形中选择右边界 (边界2)
+8. 设置 "Boundary Condition" = "Pressure"
+9. "Pressure" = "P_outlet"
+
+10. 右击 "Laminar Flow" > "Wall"
+11. 在图形中选择上边界 (边界3)
+12. 按住Ctrl选择下边界 (边界4)
+13. 确认 "Boundary Condition" = "No slip"
+
+步骤5: 材料设置
+--------------
+1. 展开 "Laminar Flow" > "Fluid Properties"
+2. 右击 "Fluid Properties" > "Material"
+3. 选择 "Liquids and Gases" > "Liquids" > "Water"
+4. 点击 "Add to Component"
+
+或者手动设置:
+1. 在 "Fluid Properties" 中
+2. 设置 "Density" = "rho_fluid"
+3. 设置 "Dynamic viscosity" = "mu_fluid"
+
+步骤6: 网格生成
+--------------
+1. 右击 "Mesh 1" > "Build All"
+2. 或者使用物理场控制网格:
+   - 右击 "Mesh 1" > "Physics-controlled mesh"
+   - "Element size" = "Fine"
+   - "Build All"
+
+步骤7: 求解设置
+--------------
+1. 右击 "Study 1" > "Compute"
+2. 等待求解完成 (应该很快)
+3. 查看求解器消息，确认 "Solution converged"
+
+步骤8: 结果查看
+--------------
+1. 展开 "Results"
+2. 默认应该有速度场和压力场图
+3. 点击各个结果查看:
+   - Velocity (spf) - 速度场
+   - Pressure (spf) - 压力场
+
+如果需要创建新图:
+1. 右击 "Results" > "2D Plot Group"
+2. 右击新图组 > "Surface"
+3. 设置 "Expression" = "comp1(u)" 或其他表达式
+
+步骤9: 数据导出
+--------------
+方法1 - 表格导出:
+1. 右击 "Results" > "Derived Values" > "Global Evaluation"
+2. 设置 "Expression" = "max(comp1(u))"
+3. 点击 "=" 计算最大速度
+
+方法2 - 数据点导出:
+1. 右击 "Results" > "Export"
+2. 设置 "Expression" = "x", "y", "comp1(u)", "comp1(v)", "p"
+3. 选择输出位置和格式
+4. 设置 "Data" = "All" 或 "Grid"
+5. 点击 "Export"
+
+方法3 - 创建数据表格:
+1. 右击 "Results" > "Table"
+2. 设置 "Expression" = "x", "y", "comp1(u)", "comp1(v)", "p"
+3. 右击表格 > "Evaluate"
+4. 右击表格 > "Export"
+
+步骤10: 保存模型
+--------------
+1. "File" > "Save As"
+2. 导航到: D:\PINNs\comsol_simulation\models\
+3. 文件名: microfluidic_channel_basic.mph
+4. 点击 "Save"
+
+预期结果验证:
+-------------
+检查以下数值是否合理:
+- 最大速度: ~0.015 m/s (1.5 × 入口速度)
+- 压力降: ~10,000 Pa
+- 雷诺数: Re = rho*U*D/mu ≈ 2.0 (层流)
+- 速度分布: 抛物线型，中心最大，壁面为0
+
+常见问题解决:
+-------------
+1. 求解不收敛: 检查边界条件，确保入口出口设置正确
+2. 奇异网格: 重新生成网格或使用更精细的网格
+3. 单位错误: 确保所有参数单位一致 (mm, m/s, Pa等)
+4. 边界选择错误: 在图形中点击选择边界，查看边界编号
+
+批量数据生成:
+-----------
+要生成多组参数数据:
+1. 修改Parameters中的值
+2. 重新Compute
+3. 导出数据并重命名文件
+4. 重复步骤1-3
+
+推荐的参数组合:
+---------------
+U_inlet = 0.001[m/s]  # 低速
+U_inlet = 0.01[m/s]   # 中速
+U_inlet = 0.05[m/s]   # 高速
+
+W_ch = 0.15[mm]      # 窄通道
+W_ch = 0.20[mm]      # 标准通道
+W_ch = 0.25[mm]      # 宽通道
+
+完成这些步骤后，你就有了可以用于PINNs训练的真实COMSOL数据！
