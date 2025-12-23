@@ -215,7 +215,7 @@
 - ✅ **参数化基准** - 包含参数化设置
 - 📋 包含参数: v_in, W, L, mu, rho
 - 🔧 使用: 在COMSOL中修改参数值即可批量生成不同工况
-- 📚 详细指南: `comsol_simulation/PARAMETRIC_SCAN_GUIDE.md`
+- 📚 详细指南: `comsol_simulation/docs/PARAMETRIC_SCAN_GUIDE.md`
 
 ### 🔧 如何使用参数化模型
 
@@ -271,17 +271,33 @@ PINNs/
 │   ├── models/                 # .mph模型文件 ✅
 │   │   ├── microfluidic_chip.mph  # 成功验证的模型 (含528K数据点)
 │   │   └── parametric_base.mph    # 参数化基准模型
-│   ├── scripts/                # 自动化脚本 ✅
-│   │   ├── test_comsol_connection.py           # COMSOL连接测试
-│   │   ├── verify_real_data.py                 # 真实数据验证脚本
-│   │   ├── create_parametric_base_model.py     # 参数化模型创建
-│   │   ├── PARAMETRIC_SCAN_GUIDE.md            # 参数化扫描指南
-│   │   └── [其他脚本...]
+│   ├── scripts/                # 重组后的脚本目录 ✅
+│   │   ├── tests/               # 测试脚本 (11个)
+│   │   │   ├── test_comsol_connection.py      # COMSOL连接测试
+│   │   │   ├── verify_real_data.py            # 真实数据验证
+│   │   │   └── validate_*.py                  # 数据验证脚本
+│   │   ├── data_processing/    # 数据处理 (6个)
+│   │   │   ├── data_loader.py               # 数据加载器
+│   │   │   ├── export_simulation_data.py     # 数据导出
+│   │   │   └── analyze_comsol_export.py      # 数据分析
+│   │   ├── model_creation/     # 模型创建 (9个)
+│   │   │   ├── create_parametric_base_model.py  # 参数化模型
+│   │   │   ├── create_microchannel*.py         # 微通道模型
+│   │   │   └── *_microchannel.java              # Java模型脚本
+│   │   ├── batch/               # 批量处理 (6个)
+│   │   │   ├── run_parametric_sweep.py         # 参数扫描
+│   │   │   ├── generate_parametric_dataset.py  # 数据集生成
+│   │   │   └── run_batch_generation.py         # 批量生成
+│   │   └── utils/              # 工具函数 (1个)
+│   │       └── comsol_parameter_calculator.py  # 参数计算器
+│   ├── docs/                   # 文档目录 ✅
+│   │   ├── MANUAL_COMPLETION_GUIDE.md         # 手动操作指南
+│   │   ├── PARAMETRIC_SCAN_GUIDE.md           # 参数扫描指南
+│   │   └── manual_data_collection_plan.md     # 数据收集计划
 │   ├── data/                   # 模拟数据文件 ✅
 │   │   ├── comsol_real_data.h5  # 真实COMSOL数据 (20.18MB)
 │   │   └── 2025_11_19-1.csv     # 原始导出数据 (52MB)
-│   ├── README.md               # COMSOL模块文档 ✅
-│   └── STATUS.md               # 模块状态报告 ✅
+│   └── logs/                   # 日志文件
 ├── pinn_training/              # PINNs训练模块
 │   ├── data_preprocessing/     # 数据预处理
 │   ├── models/                 # PINNs模型定义
@@ -338,13 +354,13 @@ PINNs/
 **Python接口配置**:
 - **包名**: mph (用于COMSOL Python API)
 - **安装命令**: `pip install mph>=0.5.0`
-- **验证脚本**: `comsol_simulation/scripts/test_comsol_connection.py`
+- **验证脚本**: `comsol_simulation/scripts/tests/test_comsol_connection.py`
 - **状态**: ✅ 连接测试通过
 
 **验证步骤**:
 ```bash
 # 1. 测试COMSOL连接
-python comsol_simulation/scripts/test_comsol_connection.py
+python comsol_simulation/scripts/tests/test_comsol_connection.py
 
 # 2. 验证 mph 模块
 python -c "import mph; print('COMSOL API available')"
@@ -376,34 +392,34 @@ python -c "import mph; print('COMSOL API available')"
 #### COMSOL数据处理 (当前可用)
 ```bash
 # 1. 测试COMSOL连接
-python comsol_simulation/scripts/test_comsol_connection.py
+python comsol_simulation/scripts/tests/test_comsol_connection.py
 
 # 2. 创建COMSOL模型 (推荐使用Java脚本)
-# 在COMSOL中运行: comsol_simulation/scripts/create_microchannel_comsol.java
+# 在COMSOL中运行: comsol_simulation/scripts/model_creation/create_microchannel_comsol.java
 
 # 3. 生成示例数据
-python comsol_simulation/scripts/export_simulation_data.py
+python comsol_simulation/scripts/data_processing/export_simulation_data.py
 
 # 4. 验证数据质量
-python comsol_simulation/scripts/validate_exported_data.py
+python comsol_simulation/scripts/tests/validate_exported_data.py
 
 # 5. 处理数据用于PINNs训练
-python comsol_simulation/scripts/data_loader.py
+python comsol_simulation/scripts/data_processing/data_loader.py
 
 # 6. 生成真实感训练数据 (带噪声和稀疏采样)
-python comsol_simulation/scripts/generate_realistic_data.py
+python comsol_simulation/scripts/batch/generate_realistic_data.py
 
 # 7. 验证数据集质量和真实性
-python comsol_simulation/scripts/validate_realistic_data.py
+python comsol_simulation/scripts/tests/validate_realistic_data.py
 
 # 8. 英文版数据检查 (解决字体显示问题)
-python comsol_simulation/scripts/english_manual_inspector.py
+python comsol_simulation/scripts/data_processing/english_manual_inspector.py
 ```
 
 #### PINNs训练 (开发阶段)
 ```bash
 # COMSOL参数扫描
-python comsol_simulation/scripts/run_parametric_sweep.py
+python comsol_simulation/scripts/batch/run_parametric_sweep.py
 
 # PINNs训练
 python pinn_training/training/train_pinn.py
@@ -416,7 +432,7 @@ python visualization/app.py  # PyQt5版本
 
 ```bash
 # COMSOL参数扫描
-python comsol_simulation/scripts/run_parametric_sweep.py
+python comsol_simulation/scripts/batch/run_parametric_sweep.py
 
 # PINNs训练
 python pinn_training/training/train_pinn.py
@@ -1314,7 +1330,7 @@ pip install -r requirements.txt
 
 # ============ COMSOL模拟 ============
 # 参数扫描
-python comsol_simulation/scripts/run_parametric_sweep.py
+python comsol_simulation/scripts/batch/run_parametric_sweep.py
 
 # 数据验证
 python comsol_simulation/scripts/validate_data.py
