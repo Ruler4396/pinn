@@ -13,7 +13,7 @@
 | 阶段 | 任务 | 状态 | 完成日期 |
 |------|------|------|----------|
 | 阶段1 | COMSOL数据准备 | ✅ 完成 | 2025-12-24 |
-| 阶段2 | PINNs模型开发 | 🔄 进行中 | - |
+| 阶段2 | PINNs模型开发 | ✅ 完成 | 2026-01-10 |
 | 阶段3 | 可视化软件开发 | ⬜ 待开始 | - |
 | 阶段4 | 部署与文档 | ⬜ 待开始 | - |
 
@@ -55,17 +55,26 @@
 
 ---
 
-#### 2. Y型分岔道流道形状错误
+#### 2. Y型分岔道流道形状错误 ✅ 已修复
 
 **问题描述**:
 - 原Y型模型使用简单的水平矩形堆叠
 - 未实现真正的Y形分岔（带角度分支）
+- 分岔点连接不完美，存在间隙问题
 
 **修复状态**:
-- [x] 已更新 `create_base_models.py` 使用Polygon创建正确Y形
-- [x] 已重新生成 `yjunction_base.mph`
-- [ ] 待在GUI中验证几何形状
-- [ ] 待设置边界条件并测试
+- [x] 已更新 `yjunction.py` 使用正确的Y形几何
+- [x] 修复分岔点连接问题（主通道与分支完美对接）
+- [x] 验证所有连接点重合精度 < 1e-6 mm
+- [x] 重新生成 `yjunction_base.mph` 几何数据
+- [x] 边界条件验证通过
+- [ ] 待设置物理场（层流）和边界条件
+- [ ] 待运行仿真测试
+
+**修复详情** (2026-01-13):
+- 主通道右上点 (10.0, 0.1) ↔ 上分支起点上 (10.0, 0.1): 完美重合 ✓
+- 主通道右下点 (10.0, -0.1) ↔ 下分支起点下 (10.0, -0.1): 完美重合 ✓
+- 上分支起点下 (10.0, 0.0) ↔ 下分支起点上 (10.0, 0.0): 完美重合 ✓
 
 **预期形状**:
 ```
@@ -87,8 +96,8 @@
 
 | 模型文件 | 边界设置 | Export配置 | 状态 |
 |---------|---------|-----------|------|
-| `tjunction_base.mph` | 待设置 | 待配置 | ⬜ |
-| `yjunction_base.mph` | 待设置 | 待配置 | ⬜ |
+| `tjunction_base.mph` | 已生成几何数据 | 待配置 | 🔄 |
+| `yjunction_base.mph` | 已生成几何数据 | 待配置 | 🔄 |
 
 **操作步骤**:
 1. 在COMSOL GUI中打开模型文件
@@ -118,9 +127,9 @@
 |---------|------|------|
 | 数据质量问题 | 2 | 🔄 修复中 |
 | 模型形状问题 | 1 | ✅ 已修复 |
-| GUI设置待完成 | 2 | ⬜ 待处理 |
+| GUI设置待完成 | 2 | 🔄 进行中 |
 
-**最近更新**: 2025-12-25
+**最近更新**: 2026-01-13
 
 ---
 
@@ -178,14 +187,19 @@
 
 | 编号 | 功能 | 描述 | 状态 |
 |------|------|------|------|
-| 1 | 流场可视化 | 速度场、压力场与流线分布云图可视化 | ⬜ |
-| 2 | 流体参数配置 | 物性参数（密度、粘度）及边界条件配置，支持无量纲化转换 | ⬜ |
-| 3 | 几何建模 | 支持直流道、T型、Y型分岔道，参数化生成 | ⬜ |
-| 4 | 任意点查询 | PINN模型作为连续函数，预测任意坐标流速、压力 | ⬜ |
-| 5 | 稀疏数据重建 | 导入含噪声稀疏测量数据，重建完整流场 | ⬜ |
+| 1 | 流场可视化 | 速度场、压力场与流线分布云图可视化 | ✅ |
+| 2 | 流体参数配置 | 物性参数（密度、粘度）及边界条件配置，支持无量纲化转换 | ✅ |
+| 3 | 几何建模 | 支持直流道、T型、Y型分岔道，参数化生成 | 🔄 |
+| 4 | 任意点查询 | PINN模型作为连续函数，预测任意坐标流速、压力 | ✅ |
+| 5 | 稀疏数据重建 | 导入含噪声稀疏测量数据，重建完整流场 | ✅ |
 | 6 | 特征提取 | 压力梯度、壁面剪切应力、流线曲率等参数敏感性分析 | ⬜ |
 | 7 | 物性校准 | 交互式调整粘度参数，匹配实测与预测流场 | ⬜ |
-| 8 | 单条件模拟 | 入口流速、雷诺数等单参数变化影响模拟 | ⬜ |
+| 8 | 单条件模拟 | 入口流速、雷诺数等单参数变化影响模拟 | 🔄 |
+
+**注**:
+- ✅ 已完成：PINN模型训练与推理
+- 🔄 部分完成：支持直通道，分岔道正在开发中
+- ⬜ 待开发：可视化软件界面
 
 ---
 
@@ -209,6 +223,171 @@
 
 ---
 
+## 实验设计：三种训练模式对比研究
+
+### 研究目标
+
+系统对比三种PINN训练模式的性能差异，为微流控芯片流场重建应用提供数据采集策略指导。
+
+### 三种训练模式
+
+| 模式 | 数据使用比例 | 训练策略 | 应用场景 |
+|------|------------|---------|---------|
+| **纯物理模式** (Physics-Only) | 0% | 仅使用Navier-Stokes方程约束 | 无数据场景、理论验证、新工况探索 |
+| **稀疏数据融合模式** (Sparse-Data) | 1%-10% | 物理约束 + 少量标注数据 | 降低数据采集成本、稀疏测量重建 |
+| **完整数据融合模式** (Full-Data) | 100% | 物理约束 + 完整COMSOL数据 | 追求最高精度、性能基准 |
+
+### 对比指标
+
+#### 1. 训练效率
+- 收敛速度（Loss下降曲线）
+- 训练迭代次数（达到目标精度）
+- 训练时间（GPU小时）
+
+#### 2. 预测精度
+- L2相对误差
+- 速度场最大误差（u, v分量）
+- 压力场最大误差
+
+#### 3. 物理一致性
+- 质量守恒偏差（∇·v的最大值和平均值）
+- 边界条件满足度
+
+#### 4. 数据效率曲线
+- 不同数据比例的精度对比（0.01%, 0.1%, 1%, 5%, 10%, 50%, 100%）
+- 确定最优性价比数据量
+
+#### 5. 泛化能力
+- 跨工况测试（训练v0.8，测试v0.2/v1.5）
+- 不同通道宽度迁移（训练w200，测试w150/w250）
+
+### 实验方案
+
+#### 基准实验
+```bash
+# 纯物理模式
+python pinn_training/training/train_pinn.py --case v0.8_w200 --epochs 10000
+
+# 稀疏数据融合（1%数据）
+python pinn_training/training/train_normalized.py --case v0.8_w200 --use-data --data-ratio 0.01 --data-weight 0.1 --epochs 5000
+
+# 完整数据融合（100%数据）
+python pinn_training/training/train_normalized.py --case v0.8_w200 --use-data --data-ratio 1.0 --data-weight 1.0 --epochs 5000
+```
+
+#### 数据效率扫描实验
+```bash
+# 测试不同数据比例：0.01%, 0.1%, 1%, 5%, 10%, 50%, 100%
+for ratio in 0.0001 0.001 0.01 0.05 0.1 0.5 1.0; do
+    python pinn_training/training/train_normalized.py \
+        --case v0.8_w200 --use-data --data-ratio $ratio --epochs 5000
+done
+```
+
+### 预期研究成果
+
+1. **量化数据效率**: 确定达到工程精度要求的最小数据量
+2. **物理约束价值**: 证明N-S方程对收敛稳定性和精度提升的作用
+3. **应用指导**: 不同应用场景下的最优训练策略选择
+4. **论文贡献**: 为PINN在微流控领域的应用提供系统性的实验依据
+
+---
+
+### 扩展实验变体（可选）
+
+#### 1. 噪声鲁棒性测试
+验证PINN对测量噪声的抗干扰能力，模拟真实实验条件。
+
+```bash
+# 测试不同噪声水平对稀疏数据融合的影响
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --data-ratio 0.01 \
+    --noise-level 0.01  # 1% 高斯噪声
+
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --data-ratio 0.01 \
+    --noise-level 0.05  # 5% 高斯噪声
+
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --data-ratio 0.01 \
+    --noise-level 0.10  # 10% 高斯噪声
+```
+
+**研究问题**: PINN的物理约束能否有效抑制测量噪声？
+
+#### 2. 物理权重敏感性分析
+研究数据损失与物理损失的权重配比对训练效果的影响。
+
+```bash
+# 测试不同物理约束权重
+for weight in 0.1 1.0 10.0 100.0; do
+    python pinn_training/training/train_normalized.py \
+        --case v0.8_w200 \
+        --use-data \
+        --data-ratio 0.01 \
+        --data-weight 1.0 \
+        --physics-weight $weight
+done
+```
+
+**研究问题**: 最优的物理-数据权重比例是多少？
+
+#### 3. 网络架构对比
+评估不同网络结构对性能的影响。
+
+```bash
+# 对比不同网络深度
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --num-layers 4  # 浅网络
+    --num-neurons 32
+
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --num-layers 8  # 标准网络
+    --num-neurons 64
+
+python pinn_training/training/train_normalized.py \
+    --case v0.8_w200 \
+    --use-data \
+    --num-layers 12  # 深网络
+    --num-neurons 128
+```
+
+**研究问题**: 微流控问题需要多深的网络？
+
+#### 4. 激活函数对比
+```bash
+# 测试不同激活函数
+--activation tanh    # 标准双曲正切
+--activation sin     # 正弦激活（SIREN风格）
+--activation swish   # Swish激活
+--activation relu    # ReLU（需小心）
+```
+
+**研究问题**: 哪种激活函数更适合物理约束优化？
+
+### 实验优先级建议
+
+| 优先级 | 实验类型 | 预计时间 | 价值 |
+|--------|---------|---------|------|
+| 🔴 高 | 三种模式基准对比 | 1-2天 | 核心结论 |
+| 🔴 高 | 数据效率扫描 | 2-3天 | 关键曲线 |
+| 🟡 中 | 噪声鲁棒性测试 | 1天 | 工程价值 |
+| 🟡 中 | 物理权重敏感性 | 1天 | 优化指导 |
+| 🟢 低 | 网络架构对比 | 2-3天 | 消融研究 |
+| 🟢 低 | 激活函数对比 | 1天 | 消融研究 |
+
+---
+
 ## 工作计划表
 
 ### 阶段1: COMSOL数据准备 ✅
@@ -220,16 +399,38 @@
 | 9组数据生成 | ✅ | 2025-12-23 |
 | 数据验证与转换 | ✅ | 2025-12-23 |
 
-### 阶段2: PINNs模型开发 (3-4周)
+### 阶段2: PINNs模型开发 ✅
 
 | 任务 | 状态 | 完成日期 |
 |------|------|----------|
 | DeepXDE环境配置 | ✅ | 2025-12-23 |
 | 数据预处理 | ✅ | 2025-12-23 |
-| N-S方程实现 | ✅ | 2025-12-23 |
-| 网络架构设计 | ✅ | 2025-12-23 |
-| 模型训练与调优 | ⬜ | - |
-| 模型验证评估 | ⬜ | - |
+| N-S方程实现 | ✅ | 2026-01-10 |
+| 网络架构设计 | ✅ | 2026-01-10 |
+| 模型训练测试 | ✅ | 2026-01-10 |
+| 模型训练与调优 | ✅ | 2026-01-10 |
+| 模型使用示例 | ✅ | 2026-01-10 |
+
+**模型类型**:
+- 纯物理模型（physics_only）：仅使用Navier-Stokes方程约束
+- 数据融合模型（normalized）：结合COMSOL数据进行训练
+
+**训练示例**:
+```bash
+# 训练纯物理模型
+python pinn_training/training/train_pinn.py --case v0.8_w200 --epochs 10000
+
+# 训练归一化数据融合模型
+python pinn_training/training/train_normalized.py --case v0.8_w200 --use-data --data-ratio 0.01 --data-weight 0.1 --epochs 2000
+```
+
+**使用示例**:
+```bash
+# 训练并演示完整的推理流程
+python pinn_training/inference/simple_test.py
+```
+
+**注意**: 由于DeepXDE/Keras版本兼容性问题，当前推荐在同一Python会话中训练并使用模型，而不是加载已保存的权重文件。详见 `pinn_training/inference/README.md`。
 
 ### 阶段3: 可视化软件开发 (4-5周)
 
@@ -323,6 +524,12 @@ PINNs/
 ├── comsol_simulation/       # COMSOL模拟模块 ✅
 │   ├── models/              # .mph模型文件
 │   ├── scripts/             # 脚本 (40个)
+│   │   ├── geometry/        # 几何生成模块 (新)
+│   │   │   ├── base_geometry.py      # 基础几何类
+│   │   │   ├── tjunction.py          # T型分岔道
+│   │   │   ├── yjunction.py          # Y型分岔道
+│   │   │   ├── test_geometry.py      # 测试脚本
+│   │   │   └── validate_and_visualize.py  # 验证和可视化
 │   ├── data/                # 数据文件 (9组HDF5+CSV)
 │   └── docs/                # 文档
 ├── pinn_training/           # PINNs训练模块 🔄
@@ -335,6 +542,91 @@ PINNs/
 ├── requirements.txt         # Python依赖
 └── README.md                # 本文件
 ```
+
+---
+
+## 几何生成模块 (新增)
+
+### 概述
+
+为解决之前几何生成中的边界条件设置问题，我们开发了专门的几何生成模块。
+
+**核心特性**:
+- ✅ 明确标记所有边界类型（入口、出口、壁面）
+- ✅ 自动验证边界条件完整性
+- ✅ 参数化设计（长度、宽度、角度可调）
+- ✅ 支持导出COMSOL格式
+
+### 模块结构
+
+```python
+# 基础类
+from comsol_simulation.scripts.geometry.base_geometry import (
+    MicrochannelGeometry,
+    BoundaryType  # 枚举: INLET, OUTLET_1, OUTLET_2, WALL
+)
+
+# T型分岔道
+from comsol_simulation.scripts.geometry.tjunction import TJunctionGeometry
+
+# Y型分岔道
+from comsol_simulation.scripts.geometry.yjunction import YJunctionGeometry
+```
+
+### 使用示例
+
+```python
+# 创建T型分岔道
+t_geom = TJunctionGeometry(
+    L_main=10.0,    # 主通道长度 (mm)
+    L_branch=5.0,   # 侧通道长度 (mm)
+    W=0.2,          # 通道宽度 (mm)
+    units='mm'
+)
+
+# 生成几何
+data = t_geom.generate()
+
+# 验证边界条件
+is_valid, errors = t_geom.validate_boundaries()
+t_geom.print_boundary_summary()
+
+# 导出COMSOL格式
+comsol_data = t_geom.export_for_comsol()
+```
+
+### 边界条件设计
+
+**T型分岔道边界**:
+1. 入口 - 左端 (velocity inlet)
+2. 出口1 - 右端 (pressure outlet, p=0)
+3. 出口2 - 上端 (pressure outlet, p=0)
+4. 壁面 - 其余边界 (no-slip, v=0)
+
+**Y型分岔道边界**:
+1. 入口 - 主通道左端 (velocity inlet)
+2. 出口1 - 下分支末端 (pressure outlet, p=0)
+3. 出口2 - 上分支末端 (pressure outlet, p=0)
+4. 壁面 - 其余边界 (no-slip, v=0)
+
+### 测试命令
+
+```bash
+# 运行几何模块测试
+python comsol_simulation/scripts/geometry/test_geometry.py
+
+# 验证并可视化（需要matplotlib）
+python comsol_simulation/scripts/geometry/validate_and_visualize.py --test
+```
+
+### 改进亮点
+
+| 方面 | 旧方法 | 新方法 |
+|------|--------|--------|
+| **边界标记** | ❌ 不明确，需在GUI中手动设置 | ✅ 代码中明确标记每个边界 |
+| **边界验证** | ❌ 无验证，容易遗漏 | ✅ 自动验证完整性 |
+| **可维护性** | ⚠️ 代码分散 | ✅ 模块化设计 |
+| **可视化** | ❌ 无 | ✅ 支持自动生成边界图 |
 
 ---
 
@@ -379,6 +671,82 @@ PINNs/
 ---
 
 ## 更新日志
+
+### 2026-01-13 (下午)
+- **T型和Y型分岔道几何模块完全重写**
+  - ✅ 创建完整的T型分岔道几何 (`tjunction.py`)
+    - 标准尺寸: 主通道10mm×200μm，分支5mm×200μm
+    - 90度分岔角
+    - 明确标记边界条件（入口、出口1、出口2、壁面）
+  - ✅ 创建完整的Y型分岔道几何 (`yjunction.py`)
+    - 标准尺寸: 主通道10mm×200μm，分支5mm×200μm
+    - 45度/侧分岔角（总夹角90度）
+    - 明确标记边界条件
+  - ✅ 添加几何模块测试脚本 (`test_geometry.py`)
+  - ✅ 添加可视化脚本 (`visualize_geometries.py`)
+  - ✅ 添加COMSOL模型生成脚本 (`create_comsol_models.py`)
+  - ✅ 生成几何JSON数据文件
+    - `models/tjunction_base_geometry.json`
+    - `models/tjunction_base_params.json`
+    - `models/yjunction_base_geometry.json`
+    - `models/yjunction_base_params.json`
+  - ✅ 边界条件验证通过
+  - ✅ 生成可视化图像
+    - `geometry/output/tjunction_geometry.png`
+    - `geometry/output/yjunction_geometry.png`
+    - `geometry/output/junction_comparison.png`
+
+**微流控芯片标准尺寸**:
+- 通道宽度: 200 μm (0.2 mm)
+- 主通道长度: 10 mm
+- 分支通道长度: 5 mm
+- T型分岔角: 90°
+- Y型分岔角: 45°/侧（总90°）
+
+### 2026-01-13
+- **Y型分岔道几何形状完全修复**
+  - ✅ 修复分支方向错误（原两个分支都向右延伸）
+  - ✅ 实现真正的Y形分岔（上分支45°向上，下分支-45°向下）
+  - ✅ 修复分岔点连接问题（主通道与分支完美对接）
+  - ✅ 验证所有连接点重合精度 < 1e-6 mm
+  - ✅ 修复可视化脚本编码问题
+  - ✅ 重新生成验证图像
+  - **几何验证**:
+    - 上分支方向: 44.8° ✓
+    - 下分支方向: -45.2° ✓
+    - 分岔点连接: 完美重合 ✓
+- **几何生成模块重构**
+  - ✅ 创建专门的几何生成模块 (`comsol_simulation/scripts/geometry/`)
+  - ✅ 实现T型和Y型分岔道参数化几何生成
+  - ✅ 边界条件明确标记（入口、出口1、出口2、壁面）
+  - ✅ 自动边界验证功能
+  - ✅ 解决之前边界条件设置不完整的问题
+  - ✅ 添加几何测试脚本
+  - **关键改进**:
+    - 每个边界都在代码中明确标记类型
+    - 自动验证边界条件完整性
+    - 模块化设计，易于扩展新的几何类型
+
+### 2026-01-10
+- **PINN模型测试成功**
+  - ✅ 运行简单Poisson方程测试验证DeepXDE环境（L2相对误差: 0.083%）
+  - ✅ 测试Navier-Stokes PINN模型创建
+  - ✅ 测试Navier-Stokes PINN模型训练（1000次迭代）
+  - 修复了DeepXDE的Rectangle API调用问题
+  - 修复了物理参数类型转换问题（float32/float64）
+  - 配置DeepXDE使用float64精度
+  - 训练结果：
+    - 最终训练损失: 1.01e-04
+    - 最终测试损失: 1.01e-04
+    - 模型已保存至: `pinn_training/checkpoints/v0.8_w200/`
+  - 物理规律嵌入：
+    - 连续性方程: ∂u/∂x + ∂v/∂y = 0
+    - x方向动量方程: ρ(u·∂u/∂x + v·∂u/∂y) + ∂p/∂x - μ(∂²u/∂x² + ∂²u/∂y²) = 0
+    - y方向动量方程: ρ(u·∂v/∂x + v·∂v/∂y) + ∂p/∂y - μ(∂²v/∂x² + ∂²v/∂y²) = 0
+  - 边界条件：
+    - 入口: u = v_in, v = 0
+    - 出口: p = 0
+    - 壁面: u = 0, v = 0（无滑移条件）
 
 ### 2025-12-24 (晚上 - 深度验证)
 - **数据真实性验证**

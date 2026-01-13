@@ -16,8 +16,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # DeepXDE配置
 os.environ['DDE_BACKEND'] = 'tensorflow'
-
 import deepxde as dde
+# 配置使用float64
+dde.config.set_default_float("float64")
 from pinn_training.models.navier_stokes import create_microchannel_pinn
 
 
@@ -87,8 +88,7 @@ class PINNTrainer:
         # 编译模型
         model.compile(
             "adam",
-            lr=self.lr,
-            loss_weights=[1.0, 1.0, 1.0, 1.0] + [10.0] * 7  # [data, pde1, pde2, pde3, bc1-7]
+            lr=self.lr
         )
 
         return model, pinn
@@ -120,22 +120,10 @@ class PINNTrainer:
         print(f"\n[3/3] 保存模型...")
         model.save(f"{checkpoint_path}.model")
 
-        # 保存训练历史
-        np.savez(
-            self.checkpoint_dir / f"{self.case}_losshistory.npz",
-            loss=losshistory.loss,
-            loss_train=losshistory.loss_train,
-            loss_test=losshistory.loss_test,
-            metric_train=losshistory.metric_train,
-            metric_test=losshistory.metric_test,
-        )
-
         print(f"\n模型已保存至: {checkpoint_path}.model")
-        print(f"训练历史已保存至: {self.checkpoint_dir / f'{self.case}_losshistory.npz'}")
 
         # 打印最终损失
-        final_loss = losshistory.loss[-1]
-        print(f"\n最终损失: {final_loss:.6e}")
+        print(f"\n训练完成! 训练了 {self.epochs} 次迭代")
 
         print("\n" + "=" * 50)
         print("训练完成!")
